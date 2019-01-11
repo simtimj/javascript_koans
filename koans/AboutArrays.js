@@ -1,111 +1,101 @@
-describe("About Functions", function() {
+describe("About Arrays", function() {
 
-  it("should declare functions", function() {
-    
-    function add(a, b) {
-      return a + b;
-    }
-    
-    expect(add(1, 2)).toBe(3);
+  // We shall contemplate truth by testing reality, via spec expectations.  
+  it("should create arrays", function() {
+    var emptyArray = [];
+    expect(typeof(emptyArray)).toBe('object'); // A mistake?-- http:javascript.crockford.com/remedial.html
+    expect(emptyArray.length).toBe(0);
+
+    var multiTypeArray = [0, 1, "two", function() { return 3; }, {value1: 4, value2: 5}, [6, 7]];
+    expect(multiTypeArray[0]).toBe(0);
+    expect(multiTypeArray[2]).toBe("two");
+    expect(multiTypeArray[3]()).toBe(3);
+    expect(multiTypeArray[4].value1).toBe(4);
+    expect(multiTypeArray[4]["value2"]).toBe(5);
+    expect(multiTypeArray[5][0]).toBe(6);
   });
 
-  it("should know internal variables override outer variables", function () {
-    var message = "Outer";
+  it("should understand array literals", function() {
+    var array = [];
+    expect(array).toEqual([]);
     
-    function getMessage() {
-      return message;
-    }
+    array[0] = 1;
+    expect(array).toEqual([1]);
     
-    function overrideMessage() {
-      var message = "Inner";
-
-      return message;
-    }
+    array[1] = 2;
+    expect(array).toEqual([1, 2]);
     
-    expect(getMessage()).toBe("Outer");
-    expect(overrideMessage()).toBe("Inner");
-    expect(message).toBe("Outer");
+    array.push(3);
+    expect(array).toEqual([1, 2, 3]);
   });
 
-  it("should have lexical scoping", function() {
-    var variable = "top-level";
+  it("should understand array length", function() {
+    var fourNumberArray = [1, 2, 3, 4];
 
-    function parentfunction() {
-      var variable = "local";
+    expect(fourNumberArray.length).toBe(4);
+    fourNumberArray.push(5, 6);
+    expect(fourNumberArray.length).toBe(6);
 
-      function childfunction() {
-        return variable;
-      }
-      return childfunction();
-    }
-    expect(parentfunction()).toBe('local');
+    var tenEmptyElementArray = new Array(10); 
+    expect(tenEmptyElementArray.length).toBe(10);  
+//I assume this array will always be length 10
+//var arr = new Array();
+
+    tenEmptyElementArray.length = 5;
+    expect(tenEmptyElementArray.length).toBe(5);
+  });
+  
+// The slice() method returns a shallow copy of a portion of an array into a new array object selected from begin to end (end not included). The original array will not be modified.
+
+  it("should slice arrays", function() {
+    var array = ["peanut", "butter", "and", "jelly"];
+    
+    expect(array.slice(0, 1)).toEqual(["peanut"]);
+    expect(array.slice(0, 2)).toEqual(["peanut", "butter"]);
+    expect(array.slice(2, 2)).toEqual([]);
+    expect(array.slice(2, 20)).toEqual(["and", "jelly"]);
+    expect(array.slice(3, 0)).toEqual([]);
+    expect(array.slice(3, 100)).toEqual(["jelly"]);
+    expect(array.slice(5, 1)).toEqual([]);
   });
 
-  it("should use lexical scoping to synthesise functions", function() {
-    
-    function makeIncreaseByFunction(increaseByAmount) {
-      return function(numberToIncrease) {
-        return numberToIncrease + increaseByAmount;
-      };
+  it("should know array references", function() {
+    var array = [ "zero", "one", "two", "three", "four", "five" ];
+
+    function passedByReference(refArray) {
+      refArray[1] = "one";
     }
-    
-    var increaseBy3 = makeIncreaseByFunction(3);
-    var increaseBy5 = makeIncreaseByFunction(5);
-    
-    expect(increaseBy3(10) + increaseBy5(10)).toBe(28);
+    passedByReference(array);
+    expect(array[1]).toBe("one");
+
+    var assignedArray = array;
+    assignedArray[5] = "five";
+    expect(array[5]).toBe("five");
+
+    var copyOfArray = array.slice();
+    copyOfArray[3] = "three";
+    expect(array[3]).toBe("three");
   });
 
-  it("should allow extra function arguments", function() {
-    
-    function returnFirstArg(firstArg) {
-      return firstArg;
-    }
-    
-    expect(returnFirstArg("first", "second", "third")).toBe("first");
-    
-    function returnSecondArg(firstArg, secondArg) {
-      return secondArg;
-    }
-    
-    expect(returnSecondArg("only give first arg")).toBe(undefined);
-    
-    function returnAllArgs() {
-      var argsArray = [];
+  it("should push and pop", function() {
+    var array = [1, 2];
+    array.push(3);
 
-      for (var i = 0; i < arguments.length; i += 1) {
-        argsArray.push(arguments[i]);
-      }
-      return argsArray.join(",");
-    }
+    expect(array).toEqual([1,2,3]);
     
-    expect(returnAllArgs("first", "second", "third")).toBe('first,second,third');
+    var poppedValue = array.pop();
+    expect(poppedValue).toBe(3);
+    expect(array).toEqual([1,2]);
   });
 
-  it("should pass functions as values", function() {
-    var appendRules = function(name) {
-      return name + " rules!";
-    };
-    
-    var appendDoubleRules = function(name) {
-      return name + " totally rules!";
-    };
-    
-    var praiseSinger = { givePraise: appendRules };
-    expect(praiseSinger.givePraise("John")).toBe('John rules!');
-    
-    praiseSinger.givePraise = appendDoubleRules;
-    expect(praiseSinger.givePraise("Mary")).toBe('Mary totally rules!');
-      
-  });
+  it("should know about shifting arrays", function() {
+    var array = [1, 2];
 
-  it("should use function body as a string", function() {
-    var add = new Function("a", "b", "return a + b;");
-    expect(add(1, 2)).toBe(3);
-     
-    var multiply = function(a, b) {
-      // An internal comment
-      return a * b;
-    };
-    expect(multiply.toString()).toBe(function(a, b) { \n// An internal comment \nreturn a * b;);
-  });    
+    array.unshift(3);
+    expect(array).toEqual([3,1,2]);
+    
+    var shiftedValue = array.shift();
+    expect(shiftedValue).toEqual(3);
+    expect(array).toEqual([1, 2]);
+  });  
 });
