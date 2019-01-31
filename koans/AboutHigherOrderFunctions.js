@@ -1,109 +1,88 @@
 var _; // globals
 
-describe("About Applying What We Have Learnt", function() {
-  var products;
+/* This section uses a functional extension known as Underscore.js - http://documentcloud.github.com/underscore/
+ * "Underscore is a utility-belt library for JavaScript that provides a lot of the functional programming support
+ * that you would expect in Prototype.js (or Ruby), but without extending any of the built-in JavaScript objects.
+ * It's the tie to go along with jQuery's tux."
+ */
+describe("About Higher Order Functions", function() {
 
-  beforeEach(function () { 
-    products = [
-       { name: "Sonoma", ingredients: ["artichoke", "sundried tomatoes", "mushrooms"], containsNuts: false },
-       { name: "Pizza Primavera", ingredients: ["roma", "sundried tomatoes", "goats cheese", "rosemary"], containsNuts: false },
-       { name: "South Of The Border", ingredients: ["black beans", "jalapenos", "mushrooms"], containsNuts: false },
-       { name: "Blue Moon", ingredients: ["blue cheese", "garlic", "walnuts"], containsNuts: true },
-       { name: "Taste Of Athens", ingredients: ["spinach", "kalamata olives", "sesame seeds"], containsNuts: true }
-    ];
-  });
-  
-
-  /*********************************************************************************/
-
-  it("given I'm allergic to nuts and hate mushrooms, it should find a pizza I can eat (imperative)", function () {
-    var i,j,hasMushrooms, productsICanEat = [];
-
-    for (i = 0; i < products.length; i+=1) {
-        if (products[i].containsNuts === false) {   //can't have nuts
-            hasMushrooms = false;                   //can't have mushrooms
-            for (j = 0; j < products[i].ingredients.length; j+=1) {
-               if (products[i].ingredients[j] === "mushrooms") {
-                  hasMushrooms = true;
-               }
-            }
-            if (!hasMushrooms) productsICanEat.push(products[i]);
-        }
-    }
-
-    expect(productsICanEat.length).toBe(1);
-  });
-
-  it("given I'm allergic to nuts and hate mushrooms, it should find a pizza I can eat (functional)", function () {
-      var productsICanEat = [];
-
-      /* solve using filter() & all() / any() */
-      /* 
-      for (i = 0; i < products.length; i+=1) {      // looping through pizzas
-        var pizza = products[i];
-        if (pizza.filter(pizza => !(pizza.containNuts))) {   
-            hasMushrooms = false;                   /
-            for (j = 0; j < products[i].ingredients.length; j+=1) {
-               if (pizza.ingredients[j] === "mushrooms") {
-                  hasMushrooms = true;
-               }
-            }
-            if (!hasMushrooms) productsICanEat.push(products[i]);
-        }
-      }
-      
-      */
-      expect(productsICanEat.length).toBe(0);  //Why?
-  });
-  
-
-  /*********************************************************************************/
-
-  it("should add all the natural numbers below 1000 that are multiples of 3 or 5 (imperative)", function () {
-    var sum = 0;
-
-    for(var i=1; i<1000; i+=1) {
-      if (i % 3 === 0 || i % 5 === 0) {
-        sum += i;
-      }
-    }
+  it("should use filter to return array items that meet a criteria", function () {
+    var numbers = [1,2,3];
+    var odd     = _(numbers).filter(function(x) { return x % 2 !== 0 });
     
-    expect(sum).toBe(233168);
+    expect(odd).toEqual([1,3]);
+    expect(odd.length).toBe(2);
+    expect(numbers.length).toBe(3);
   });
-
-  it("should add all the natural numbers below 1000 that are multiples of 3 or 5 (functional)", function () {
-    var sum = [];    /* try chaining range() and reduce() */
-    // use range to iterate from 1 to 1000
-    // if multiples of 3 or 5
-    //    add to array
-    // use reduce to add all of array together
-    // return sum
-    expect(233168).toBe(233168);
-  });
-
-  /*********************************************************************************/
-   it("should count the ingredient occurrence (imperative)", function () {
-    var ingredientCount = { "{ingredient name}": 0 };
-
-    for (i = 0; i < products.length; i+=1) {
-        for (j = 0; j < products[i].ingredients.length; j+=1) {
-            ingredientCount[products[i].ingredients[j]] = (ingredientCount[products[i].ingredients[j]] || 0) + 1;
-        }
-    }
-
-    expect(ingredientCount['mushrooms']).toBe(FILL_ME_IN);
-  });
-
-  it("should count the ingredient occurrence (functional)", function () {
-    var ingredientCount = { "{ingredient name}": 0 };
-
-    /* chain() together map(), flatten() and reduce() */
     
-    expect(ingredientCount['mushrooms']).toBe(2);
+  it("should use 'map' to transform each element", function() {
+    var numbers      = [1, 2, 3];
+    var numbersPlus1 = _(numbers).map(function(x) { return x + 1 });
+    
+    expect(numbersPlus1).toEqual([2,3,4]);
+    expect(numbers).toEqual([1, 2, 3]);
   });
-  
-  /*
-    it("should use chain() ... .value() to use multiple higher order functions", function() {
+    
+  it("should use 'reduce' to update the same result on each iteration", function () {
+    var numbers   = [1, 2, 3];
+    var reduction = _(numbers).reduce(
+      function(memo, x) {
+
+        // note: memo is the result from last call, and x is the current number
+        return memo + x;
+      }, 
+      /* initial */ 0
+    );
+    
+    expect(reduction).toBe(6);
+    expect(numbers).toEqual([1, 2, 3]);
+  });
+    
+  it("should use 'forEach' for simple iteration", function() {
+    var numbers = [1,2,3];
+    var msg     = "";
+    var isEven  = function(item) {
+      msg += (item % 2) === 0;
+    };
+
+    _(numbers).forEach(isEven);
+    
+    expect(msg).toEqual("falsetruefalse");
+    expect(numbers).toEqual([1,2,3]);
+  }); 
+    
+  it("should use 'all' to test whether all items pass condition", function() {
+    var onlyEven = [2,4,6];
+    var mixedBag = [2,4,5,6];
+
+    var isEven = function(x) { return x % 2 === 0 };
+
+    expect(_(onlyEven).all(isEven)).toBe(true);
+    expect(_(mixedBag).all(isEven)).toBe(false);
+  });
+    
+  it("should use 'any' to test if any items passes condition" , function() {
+    var onlyEven = [2,4,6];
+    var mixedBag = [2,4,5,6];
+
+    var isEven = function(x) { return x % 2 === 0 };
+
+    expect(_(onlyEven).any(isEven)).toBe(true);
+    expect(_(mixedBag).any(isEven)).toBe(true);
+  });
+
+  it("should use range to generate an array", function() {
+    expect(_.range(3)).toEqual([0,1,2]);
+    expect(_.range(1, 4)).toEqual([1,2,3]);
+    expect(_.range(0, -4, -1)).toEqual([0,-1,-2,-3]);
+  });
+
+  it("should use flatten to make nested arrays easy to work with", function() {
+    expect(_([ [1, 2], [3, 4] ]).flatten()).toEqual([1, 2, 3, 4]);
+  });
+
+  it("should use chain() ... .value() to use multiple higher order functions", function() {
     var result = _([ [0, 1], 2 ]).chain()
                      .flatten()      //[0,1,2]
                      .map(function(x) { return x+1 } ) //[1,2,3]
@@ -112,32 +91,5 @@ describe("About Applying What We Have Learnt", function() {
 
     expect(result).toEqual(6);
   });
-  */
-  
-  
 
-  /*********************************************************************************/
-  /* UNCOMMENT FOR EXTRA CREDIT */
-  /*
-  it("should find the largest prime factor of a composite number", function () {
-  
-  });
-
-  it("should find the largest palindrome made from the product of two 3 digit numbers", function () {
-    
-  });
-
-  it("should find the smallest number divisible by each of the numbers 1 to 20", function () {
-      
-    
-  });
-
-  it("should find the difference between the sum of the squares and the square of the sums", function () {
-    
-  });
-
-  it("should find the 10001st prime", function () {
-
-  });
-  */
 });
